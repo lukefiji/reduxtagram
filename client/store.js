@@ -15,9 +15,24 @@ const defaultState = {
   comments
 };
 
-const store = createStore(rootReducer, defaultState);
+// Enable Redux dev tools
+const enhancers = compose(
+  window.devToolsExtension ? window.devToolsExtension() : (f) => f
+);
+
+const store = createStore(rootReducer, defaultState, enhancers);
 
 // Weave in history into store
 export const history = syncHistoryWithStore(browserHistory, store);
+
+// Enable hot reloading reducers
+if (module.hot) {
+  module.hot.accept('./reducers/', () => {
+    // You cannot use ES6 imports in functions,
+    // you have to use CommonJS require syntax
+    const nextRootReducer = require('./reducers/index').default;
+    store.replaceReducer(nextRootReducer);
+  });
+}
 
 export default store;
